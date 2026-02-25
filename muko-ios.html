@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Muko Brunch</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  :root {
+    --ios-bg: #f2f2f7;
+    --ios-card: #ffffff;
+    --ios-blue: #007aff;
+    --ios-orange: #ff9500;
+    --ios-red: #ff3b30;
+    --ios-green: #34c759;
+    --ios-gray: #8e8e93;
+    --ios-gray2: #aeaeb2;
+    --ios-gray3: #c7c7cc;
+    --ios-gray4: #d1d1d6;
+    --ios-gray5: #e5e5ea;
+    --ios-gray6: #f2f2f7;
+    --ios-label: #000000;
+    --ios-label2: rgba(60,60,67,0.6);
+    --ios-label3: rgba(60,60,67,0.3);
+    --ios-separator: rgba(60,60,67,0.12);
+    --ios-grouped-bg: #f2f2f7;
+    --ios-grouped-card: #ffffff;
+    --tab-h: 83px;
+    --nav-h: 96px;
+    --status-h: 44px;
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html, body, #root {
+    height: 100%; width: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: -apple-system, 'SF Pro Display', BlinkMacSystemFont, sans-serif;
+  }
+
+  /* iPhone frame */
+  .iphone-frame {
+    width: 390px;
+    height: 844px;
+    margin: auto;
+    position: relative;
+    border-radius: 54px;
+    background: #1a1a1a;
+    box-shadow:
+      0 0 0 1px #333,
+      0 0 0 3px #555,
+      0 40px 120px rgba(0,0,0,0.9),
+      inset 0 0 0 1px rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Side buttons */
+  .iphone-frame::before {
+    content: '';
+    position: absolute;
+    left: -3px; top: 130px;
+    width: 3px; height: 34px;
+    background: #555;
+    border-radius: 3px 0 0 3px;
+    box-shadow: 0 46px 0 #555, 0 90px 0 #555;
+  }
+  .iphone-frame::after {
+    content: '';
+    position: absolute;
+    right: -3px; top: 170px;
+    width: 3px; height: 68px;
+    background: #555;
+    border-radius: 0 3px 3px 0;
+  }
+
+  .iphone-screen {
+    width: 360px;
+    height: 780px;
+    border-radius: 44px;
+    overflow: hidden;
+    background: var(--ios-bg);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Dynamic Island */
+  .dynamic-island {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 34px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dynamic-island .camera-dot {
+    width: 10px; height: 10px;
+    background: #1a1a1a;
+    border-radius: 50%;
+    border: 2px solid #333;
+    margin-left: 30px;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 59px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 28px 8px;
+    justify-content: space-between;
+    position: relative;
+    z-index: 100;
+  }
+
+  .status-time {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ios-label);
+  }
+
+  .status-icons {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .status-icons svg {
+    fill: var(--ios-label);
+  }
+
+  /* Nav bar */
+  .nav-bar {
+    padding: 0 20px 8px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-shrink: 0;
+    background: var(--ios-bg);
+  }
+
+  .nav-title {
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--ios-label);
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  .nav-title span {
+    color: var(--ios-orange);
+  }
+
+  .nav-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--ios-gray5);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: opacity 0.15s;
+    color: var(--ios-blue);
+    font-weight: 500;
+  }
+
+  .nav-btn:active { opacity: 0.5; }
+
+  /* Segment Control */
+  .segment-wrap {
+    padding: 0 16px 12px;
+    flex-shrink: 0;
+  }
+
+  .segment-control {
+    background: var(--ios-gray5);
+    border-radius: 10px;
+    padding: 2px;
+    display: flex;
+    gap: 0;
+  }
+
+  .segment-btn {
+    flex: 1;
+    height: 32px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ios-label2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .segment-btn.active {
+    background: white;
+    color: var(--ios-label);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1);
+  }
+
+  /* Scroll area */
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* Date strip */
+  .date-strip-wrap {
+    padding: 0 16px 8px;
+    flex-shrink: 0;
+    background: var(--ios-bg);
+  }
+
+  .date-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .date-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ios-label);
+  }
+
+  .date-arrow {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ios-blue);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s;
+  }
+
+  .date-arrow:active { opacity: 0.4; }
+
+  .date-strip {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .date-strip::-webkit-scrollbar { display: none; }
+
+  .date-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    min-width: 40px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .date-chip.today { background: var(--ios-orange); }
+  .date-chip.selected:not(.today) { background: var(--ios-blue); }
+  .date-chip.weekend:not(.today):not(.selected) { background: rgba(255,149,0,0.1); }
+
+  .date-chip-day {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ios-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .date-chip.today .date-chip-day,
+  .date-chip.selected .date-chip-day { color: rgba(255,255,255,0.8); }
+
+  .date-chip-num {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ios-label);
+    margin-top: 2px;
+  }
+
+  .date-chip.today .date-chip-num,
+  .date-chip.selected .date-chip-num { color: white; }
+
+  /* Section header */
+  .section-header {
+    padding: 20px 16px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ios-label2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Staff cards */
+  .staff-card {
+    background: var(--ios-card);
+    margin: 0 16px 1px;
+    border-radius: 0;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .staff-card:first-of-type { border-radius: 12px 12px 0 0; }
+  .staff-card:last-of-type { border-radius: 0 0 12px 12px; margin-bottom: 0; }
+  .staff-card:only-child { border-radius: 12px; }
+
+  .staff-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 72px; right: 0;
+    height: 0.5px;
+    background: var(--ios-separator);
+  }
+
+  .staff-card:last-of-type::after { display: none; }
+  .staff-card:active { background: var(--ios-gray5); }
+
+  .avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .staff-info { flex: 1; min-width: 0; }
+
+  .staff-name {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ios-label);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .staff-role {
+    font-size: 13px;
+    color: var(--ios-label2);
+    margin-top: 1px;
+  }
+
+  .staff-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .hours-badge {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ios-orange);
+    line-height: 1;
+  }
+
+  .hours-label {
+    font-size: 11px;
+    color: var(--ios-gray);
+    font-weight: 500;
+  }
+
+  /* Shift pills on day view */
+  .shift-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  .shift-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  /* Tab bar */
+  .tab-bar {
+    height: 83px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 0.5px solid var(--ios-separator);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    padding-top: 10px;
+    flex-shrink: 0;
+  }
+
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 4px 16px;
+    border-radius: 10px;
+    transition: opacity 0.15s;
+    border: none;
+    background: none;
+  }
+
+  .tab-item:active { opacity: 0.5; }
+
+  .tab-icon {
+    font-size: 22px;
+    line-height: 1;
+    filter: grayscale(1) opacity(0.5);
+    transition: filter 0.2s;
+  }
+
+  .tab-item.active .tab-icon { filter: none; }
+
+  .tab-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ios-gray);
+    transition: color 0.2s;
+  }
+
+  .tab-item.active .tab-label { color: var(--ios-blue); }
+
+  /* Modal sheet */
+  .sheet-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 500;
+    display: flex;
+    align-items: flex-end;
+    border-radius: 44px;
+    overflow: hidden;
+  }
+
+  .sheet {
+    width: 100%;
+    background: var(--ios-grouped-card);
+    border-radius: 16px 16px 0 0;
+    padding-bottom: 34px;
+    animation: slideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .sheet-handle {
+    width: 36px; height: 5px;
+    background: var(--ios-gray3);
+    border-radius: 3px;
+    margin: 12px auto 4px;
+  }
+
+  .sheet-title {
+    text-align: center;
+    font-size: 17px;
+    font-weight: 600;
+    padding: 8px 16px 20px;
+    color: var(--ios-label);
+  }
+
+  .sheet-section {
+    background: white;
+    margin: 0 16px 16px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .sheet-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 12px;
+    border-bottom: 0.5px solid var(--ios-separator);
+    position: relative;
+  }
+
+  .sheet-row:last-child { border-bottom: none; }
+
+  .sheet-row label {
+    font-size: 17px;
+    color: var(--ios-label);
+    min-width: 60px;
+    flex-shrink: 0;
+  }
+
+  .sheet-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 17px;
+    color: var(--ios-blue);
+    text-align: right;
+    background: transparent;
+    font-family: inherit;
+  }
+
+  .sheet-input::placeholder { color: var(--ios-gray3); }
+
+  .ios-btn {
+    display: block;
+    width: calc(100% - 32px);
+    margin: 0 16px;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    font-family: inherit;
+  }
+
+  .ios-btn:active { opacity: 0.7; }
+  .ios-btn.primary { background: var(--ios-blue); color: white; }
+  .ios-btn.destructive { background: rgba(255,59,48,0.1); color: var(--ios-red); margin-top: 8px; }
+
+  /* Color picker */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 12px 16px;
+    background: white;
+    margin: 0 16px 16px;
+    border-radius: 12px;
+  }
+
+  .color-option {
+    padding: 10px 6px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .color-option.selected { border-color: var(--ios-blue); transform: scale(1.05); }
+  .color-option:active { transform: scale(0.95); }
+
+  .color-swatch {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+  }
+
+  /* Add button floating */
+  .fab {
+    position: absolute;
+    bottom: 100px;
+    right: 20px;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--ios-orange);
+    color: white;
+    border: none;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(255,149,0,0.5);
+    z-index: 100;
+    transition: transform 0.15s;
+  }
+
+  .fab:active { transform: scale(0.92); }
+
+  /* Staff detail tab */
+  .staff-detail-card {
+    background: var(--ios-card);
+    margin: 0 16px 16px;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .stats-row {
+    display: flex;
+    border-top: 0.5px solid var(--ios-separator);
+  }
+
+  .stat-item {
+    flex: 1;
+    padding: 14px;
+    text-align: center;
+    border-right: 0.5px solid var(--ios-separator);
+  }
+
+  .stat-item:last-child { border-right: none; }
+
+  .stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ios-orange);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--ios-gray);
+    font-weight: 500;
+    margin-top: 2px;
+  }
+
+  /* Toast */
+  .toast {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 999;
+    white-space: nowrap;
+    animation: toastAnim 2s ease forwards;
+  }
+
+  @keyframes toastAnim {
+    0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    70% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  }
+
+  /* Desktop centering */
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  }
+
+  /* Swipe hint label */
+  .swipe-hint {
+    font-size: 11px;
+    color: var(--ios-gray);
+    text-align: center;
+    padding: 6px;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useMemo, useEffect, useRef } = React;
+
+const AVATAR_COLORS = ['#FF9500','#FF3B30','#007AFF','#34C759','#AF52DE','#FF2D55','#5856D6','#00C7BE'];
+
+const SHIFT_TYPES = [
+  { label: '早班', bg: '#FFF3E0', text: '#E65100', dot: '#FF9500' },
+  { label: '晚班', bg: '#E8EAF6', text: '#283593', dot: '#5C6BC0' },
+  { label: '外場', bg: '#E8F5E9', text: '#1B5E20', dot: '#4CAF50' },
+  { label: '廚房', bg: '#FCE4EC', text: '#880E4F', dot: '#E91E63' },
+  { label: '吧台', bg: '#E0F7FA', text: '#006064', dot: '#00BCD4' },
+  { label: '洗碗', bg: '#ECEFF1', text: '#455A64', dot: '#607D8B' },
+  { label: '休假', bg: '#F5F5F5', text: '#9E9E9E', dot: '#BDBDBD' },
+];
+
+const parseDuration = (str) => {
+  const m = str.match(/(\d{1,2})[:：](\d{2})\s*[-~]\s*(\d{1,2})[:：](\d{2})/);
+  if (m) {
+    const s = +m[1] + +m[2]/60, e = +m[3] + +m[4]/60;
+    let d = e - s; if (d < 0) d += 24; return d;
+  }
+  return 0;
+};
+
+const formatDate = d => d.toISOString().split('T')[0];
+
+const getMonday = d => {
+  const date = new Date(d), day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(date.setDate(diff));
+};
+
+const DAYS_ZH = ['日','一','二','三','四','五','六'];
+const TODAY = formatDate(new Date());
+
+const INIT_EMPLOYEES = [
+  { id: 'u1', name: '店長', role: '管理組', color: AVATAR_COLORS[0] },
+  { id: 'u2', name: '小萱', role: '外場正職', color: AVATAR_COLORS[2] },
+  { id: 'u3', name: '阿傑', role: '內場工讀', color: AVATAR_COLORS[3] },
+];
+const INIT_SHIFTS = [
+  { id: 's1', empId: 'u1', date: TODAY, type: 0, time: '08:30 - 17:30' },
+  { id: 's2', empId: 'u2', date: TODAY, type: 2, time: '09:00 - 15:00' },
+];
+
+// ---- Sub Components ----
+
+function StatusBar() {
+  const [time, setTime] = useState(new Date());
+  useEffect(() => { const t = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(t); }, []);
+  const h = time.getHours().toString().padStart(2,'0');
+  const m = time.getMinutes().toString().padStart(2,'0');
+  return (
+    <div className="status-bar">
+      <span className="status-time">{h}:{m}</span>
+      <div className="status-icons">
+        <svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.3"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.5"/><rect x="9" y="0.5" width="3" height="11.5" rx="1" opacity="0.8"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 2.4C5.2 2.4 2.7 3.6 1 5.6L0 4.4C2 2.1 4.8 0.6 8 0.6s6 1.5 8 3.8l-1 1.2C13.3 3.6 10.8 2.4 8 2.4z" opacity="0.4"/><path d="M8 5.2c-1.8 0-3.4.8-4.5 2L2.5 6c1.3-1.5 3.2-2.4 5.5-2.4s4.2.9 5.5 2.4l-1 1.2C11.4 6 9.8 5.2 8 5.2z" opacity="0.7"/><path d="M8 8c-1 0-1.9.4-2.5 1.1L4.5 8c.9-1 2.2-1.6 3.5-1.6s2.6.6 3.5 1.6l-1 1.1C9.9 8.4 9 8 8 8z"/><circle cx="8" cy="11" r="1"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0" y="1" width="21" height="10" rx="3" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.35"/><rect x="22" y="4" width="2.5" height="4" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="2.5" width="16" height="7" rx="1.5" fill="currentColor"/></svg>
+      </div>
+    </div>
+  );
+}
+
+function ShiftPill({ shift }) {
+  const t = SHIFT_TYPES[shift.type] || SHIFT_TYPES[0];
+  return (
+    <span className="shift-pill" style={{ background: t.bg, color: t.text }}>
+      <span className="shift-dot" style={{ background: t.dot }}></span>
+      {t.label} {shift.time ? `· ${shift.time}` : ''}
+    </span>
+  );
+}
+
+function ShiftEditor({ empId, date, shift, onSave, onDelete, onClose }) {
+  const def = shift || { type: 0, time: '' };
+  const [type, setType] = useState(def.type || 0);
+  const [time, setTime] = useState(def.time || '');
+  const hrs = parseDuration(time);
+
+  const handleSave = () => {
+    if (!time.trim()) { alert('請填入時段'); return; }
+    onSave({ ...def, empId, date, type, time });
+  };
+
+  return (
+    <div className="sheet-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="sheet">
+        <div className="sheet-handle"></div>
+        <div className="sheet-title">{shift ? '編輯班表' : '新增班表'}</div>
+
+        <div className="sheet-section">
+          <div className="sheet-row">
+            <label>時段</label>
+            <input className="sheet-input" value={time} onChange={e => setTime(e.target.value)}
+              placeholder="08:30 - 17:30" autoFocus />
+          </div>
+          {hrs > 0 && (
+            <div className="sheet-row" style={{ justifyContent: 'flex-end' }}>
+              <span style={{ fontSize: 14, color: '#FF9500', fontWeight: 600 }}>⏱ {hrs.toFixed(1)} 小時</span>
+            </div>
+          )}
+        </div>
+
+        <div style={{ padding: '0 16px 4px 16px', fontSize: 13, fontWeight: 600, color: 'var(--ios-label2)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>職務</div>
+        <div className="color-grid">
+          {SHIFT_TYPES.map((t, i) => (
+            <div key={i} className={`color-option ${type === i ? 'selected' : ''}`}
+              style={{ background: type === i ? t.bg : '#f8f8f8', color: t.text }}
+              onClick={() => setType(i)}>
+              <div className="color-swatch" style={{ background: t.dot }}></div>
+              {t.label}
+            </div>
+          ))}
+        </div>
+
+        <button className="ios-btn primary" onClick={handleSave}>儲存</button>
+        {shift && <button className="ios-btn destructive" onClick={() => { onDelete(shift.id); onClose(); }}>刪除班表</button>}
+        <button className="ios-btn" style={{ background: 'transparent', color: 'var(--ios-gray)', marginTop: 8 }} onClick={onClose}>取消</button>
+      </div>
+    </div>
+  );
+}
+
+function EmployeeEditor({ emp, onSave, onClose }) {
+  const [name, setName] = useState(emp ? emp.name : '');
+  const [role, setRole] = useState(emp ? emp.role : '');
+  const [color, setColor] = useState(emp ? emp.color : AVATAR_COLORS[0]);
+
+  return (
+    <div className="sheet-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="sheet">
+        <div className="sheet-handle"></div>
+        <div className="sheet-title">{emp ? '編輯夥伴' : '新增夥伴'}</div>
+        <div className="sheet-section">
+          <div className="sheet-row">
+            <label>姓名</label>
+            <input className="sheet-input" value={name} onChange={e => setName(e.target.value)} placeholder="員工姓名" autoFocus />
+          </div>
+          <div className="sheet-row">
+            <label>職稱</label>
+            <input className="sheet-input" value={role} onChange={e => setRole(e.target.value)} placeholder="職稱" />
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 10, padding: '0 16px 16px', justifyContent: 'center' }}>
+          {AVATAR_COLORS.map(c => (
+            <div key={c} onClick={() => setColor(c)}
+              style={{ width: 30, height: 30, borderRadius: '50%', background: c, cursor: 'pointer',
+                border: color === c ? '3px solid white' : '3px solid transparent',
+                boxShadow: color === c ? `0 0 0 2px ${c}` : 'none',
+                transition: 'all 0.2s' }} />
+          ))}
+        </div>
+        <button className="ios-btn primary" onClick={() => { if(!name.trim()) return; onSave({ name, role, color }); }}>儲存</button>
+        <button className="ios-btn" style={{ background: 'transparent', color: 'var(--ios-gray)', marginTop: 8 }} onClick={onClose}>取消</button>
+      </div>
+    </div>
+  );
+}
+
+// ---- Main Tabs ----
+
+function ScheduleTab({ employees, shifts, setShifts }) {
+  const [viewMode, setViewMode] = useState('week');
+  const [baseDate, setBaseDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(TODAY);
+  const [editor, setEditor] = useState(null); // {empId, date, shift?}
+
+  const displayDays = useMemo(() => {
+    const days = [];
+    if (viewMode === 'week') {
+      let start = getMonday(baseDate);
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(start); d.setDate(start.getDate() + i); days.push(d);
+      }
+    } else {
+      const y = baseDate.getFullYear(), mo = baseDate.getMonth();
+      const date = new Date(y, mo, 1);
+      while (date.getMonth() === mo) { days.push(new Date(date)); date.setDate(date.getDate()+1); }
+    }
+    return days;
+  }, [baseDate, viewMode]);
+
+  useEffect(() => {
+    // keep selected date in range
+    if (!displayDays.find(d => formatDate(d) === selectedDate)) {
+      setSelectedDate(formatDate(displayDays[0]));
+    }
+  }, [displayDays]);
+
+  const navigate = delta => {
+    const d = new Date(baseDate);
+    if (viewMode === 'week') d.setDate(d.getDate() + delta * 7);
+    else d.setMonth(d.getMonth() + delta);
+    setBaseDate(d);
+  };
+
+  const titleText = viewMode === 'week'
+    ? `${displayDays[0].getMonth()+1}月${displayDays[0].getDate()}日 – ${displayDays[6].getDate()}日`
+    : `${baseDate.getFullYear()}年 ${baseDate.getMonth()+1}月`;
+
+  const selectedShifts = shifts.filter(s => s.date === selectedDate);
+
+  const getEmpHours = empId => {
+    const ds = new Set(displayDays.map(d => formatDate(d)));
+    return shifts.filter(s => s.empId === empId && ds.has(s.date)).reduce((t, s) => t + parseDuration(s.time), 0);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      {/* Nav */}
+      <div className="nav-bar" style={{ paddingTop: 4 }}>
+        <div className="nav-title">班表 <span>·</span></div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="nav-btn" onClick={() => navigate(-1)}>‹</button>
+          <button className="nav-btn" onClick={() => navigate(1)}>›</button>
+        </div>
+      </div>
+
+      {/* Segment */}
+      <div className="segment-wrap">
+        <div className="segment-control">
+          <button className={`segment-btn ${viewMode==='week'?'active':''}`} onClick={() => setViewMode('week')}>本週</button>
+          <button className={`segment-btn ${viewMode==='month'?'active':''}`} onClick={() => setViewMode('month')}>本月</button>
+        </div>
+      </div>
+
+      {/* Date strip */}
+      <div className="date-strip-wrap">
+        <div className="date-nav">
+          <span className="date-label">{titleText}</span>
+        </div>
+        <div className="date-strip" id="dateStrip">
+          {displayDays.map(d => {
+            const ds = formatDate(d);
+            const isToday = ds === TODAY;
+            const isSel = ds === selectedDate;
+            const isWe = d.getDay() === 0 || d.getDay() === 6;
+            const hasShift = shifts.some(s => s.date === ds);
+            return (
+              <div key={ds} className={`date-chip ${isToday?'today':''} ${isSel&&!isToday?'selected':''} ${isWe&&!isToday&&!isSel?'weekend':''}`}
+                onClick={() => setSelectedDate(ds)}>
+                <span className="date-chip-day">{DAYS_ZH[d.getDay()]}</span>
+                <span className="date-chip-num">{d.getDate()}</span>
+                {hasShift && !isToday && !isSel && <div style={{width:4,height:4,borderRadius:'50%',background:'var(--ios-orange)',marginTop:2}}></div>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Staff list for selected date */}
+      <div className="scroll-area">
+        <div className="section-header">夥伴班表</div>
+        <div style={{ padding: '0 0 80px' }}>
+          {employees.map((emp, idx) => {
+            const empShifts = selectedShifts.filter(s => s.empId === emp.id);
+            const hrs = getEmpHours(emp.id);
+            return (
+              <div key={emp.id} className={`staff-card ${idx===0?'first':''}`}
+                style={{ borderRadius: idx===0?'12px 12px 0 0': idx===employees.length-1?'0 0 12px 12px':'0' }}
+                onClick={() => setEditor({ empId: emp.id, date: selectedDate })}>
+                <div className="avatar" style={{ background: emp.color }}>
+                  {emp.name[0]}
+                </div>
+                <div className="staff-info">
+                  <div className="staff-name">{emp.name}</div>
+                  <div className="staff-role">{emp.role}</div>
+                  <div>
+                    {empShifts.length === 0
+                      ? <span style={{ fontSize: 12, color: 'var(--ios-gray3)', fontStyle: 'italic' }}>未排班 · 點擊新增</span>
+                      : empShifts.map(s => <ShiftPill key={s.id} shift={s} />)
+                    }
+                  </div>
+                </div>
+                <div className="staff-right">
+                  <span className="hours-badge" style={{ color: hrs > 40 ? '#FF3B30' : 'var(--ios-orange)' }}>{hrs}</span>
+                  <span className="hours-label">{viewMode==='week'?'本週':'本月'}hrs</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Sheet editor */}
+      {editor && (() => {
+        const existingShifts = shifts.filter(s => s.empId === editor.empId && s.date === editor.date);
+        // Show list or add
+        return (
+          <div className="sheet-backdrop" onClick={e => e.target === e.currentTarget && setEditor(null)}>
+            <div className="sheet">
+              <div className="sheet-handle"></div>
+              <div className="sheet-title">
+                {employees.find(e=>e.id===editor.empId)?.name} · {editor.date}
+              </div>
+              {existingShifts.length > 0 && (
+                <div className="sheet-section">
+                  {existingShifts.map(s => (
+                    <div key={s.id} className="sheet-row" style={{ cursor: 'pointer' }}
+                      onClick={() => setEditor({ ...editor, editShift: s })}>
+                      <ShiftPill shift={s} />
+                      <span style={{ marginLeft: 'auto', color: 'var(--ios-gray)', fontSize: 14 }}>›</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button className="ios-btn primary" onClick={() => setEditor({ ...editor, addNew: true })}>＋ 新增班表</button>
+              <button className="ios-btn" style={{ background: 'transparent', color: 'var(--ios-gray)', marginTop: 8 }} onClick={() => setEditor(null)}>取消</button>
+            </div>
+          </div>
+        );
+      })()}
+
+      {editor?.addNew && (
+        <ShiftEditor empId={editor.empId} date={editor.date} shift={null}
+          onSave={data => { setShifts(prev => [...prev, { ...data, id: 's'+Date.now() }]); setEditor(null); }}
+          onDelete={() => {}} onClose={() => setEditor(null)} />
+      )}
+
+      {editor?.editShift && (
+        <ShiftEditor empId={editor.empId} date={editor.date} shift={editor.editShift}
+          onSave={data => { setShifts(prev => prev.map(s => s.id===data.id?data:s)); setEditor(null); }}
+          onDelete={id => setShifts(prev => prev.filter(s => s.id!==id))}
+          onClose={() => setEditor(null)} />
+      )}
+    </div>
+  );
+}
+
+function StaffTab({ employees, setEmployees, shifts }) {
+  const [empEditor, setEmpEditor] = useState(null); // null | 'new' | empObj
+
+  const getEmpShiftsCount = id => shifts.filter(s => s.empId === id).length;
+  const getEmpHours = id => shifts.filter(s => s.empId === id).reduce((t, s) => t + parseDuration(s.time), 0);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      <div className="nav-bar" style={{ paddingTop: 4, justifyContent: 'space-between' }}>
+        <div className="nav-title">夥伴</div>
+        <button className="nav-btn" style={{ background: 'var(--ios-orange)', color: 'white', fontSize: 22, width: 32, height: 32 }}
+          onClick={() => setEmpEditor('new')}>+</button>
+      </div>
+
+      <div className="scroll-area">
+        <div className="section-header">員工清單 ({employees.length})</div>
+        <div style={{ paddingBottom: 80 }}>
+          {employees.map((emp, idx) => (
+            <div key={emp.id} className="staff-card"
+              style={{ borderRadius: idx===0?'12px 12px 0 0':idx===employees.length-1?'0 0 12px 12px':'0' }}
+              onClick={() => setEmpEditor(emp)}>
+              <div className="avatar" style={{ background: emp.color }}>{emp.name[0]}</div>
+              <div className="staff-info">
+                <div className="staff-name">{emp.name}</div>
+                <div className="staff-role">{emp.role}</div>
+              </div>
+              <div className="staff-right">
+                <span style={{ fontSize: 13, color: 'var(--ios-gray)', fontWeight: 500 }}>
+                  {getEmpShiftsCount(emp.id)} 班 · {getEmpHours(emp.id).toFixed(0)}h
+                </span>
+                <span style={{ color: 'var(--ios-gray3)', fontSize: 18 }}>›</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {empEditor && (
+        <EmployeeEditor
+          emp={empEditor === 'new' ? null : empEditor}
+          onSave={data => {
+            if (empEditor === 'new') {
+              setEmployees(prev => [...prev, { ...data, id: 'u'+Date.now() }]);
+            } else {
+              setEmployees(prev => prev.map(e => e.id===empEditor.id ? { ...e, ...data } : e));
+            }
+            setEmpEditor(null);
+          }}
+          onClose={() => setEmpEditor(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function SettingsTab({ employees, shifts, setEmployees, setShifts }) {
+  const [toast, setToast] = useState(null);
+  const fileRef = useRef(null);
+
+  const showToast = msg => { setToast(msg); setTimeout(() => setToast(null), 2200); };
+
+  const handleExport = () => {
+    const data = JSON.stringify({ employees, shifts }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `Muko_${formatDate(new Date())}.json`;
+    a.click(); URL.revokeObjectURL(url);
+    showToast('✅ 備份成功');
+  };
+
+  const handleImport = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (data.employees && data.shifts) {
+          if (confirm('讀取備份將覆蓋現有資料，確定嗎？')) {
+            setEmployees(data.employees); setShifts(data.shifts);
+            showToast('✅ 讀取成功');
+          }
+        } else showToast('❌ 格式錯誤');
+      } catch { showToast('❌ 無法解析'); }
+    };
+    reader.readAsText(file); e.target.value = '';
+  };
+
+  const totalHours = shifts.reduce((t, s) => t + parseDuration(s.time), 0);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      <div className="nav-bar" style={{ paddingTop: 4 }}>
+        <div className="nav-title">設定</div>
+      </div>
+      <div className="scroll-area">
+        {toast && <div className="toast">{toast}</div>}
+
+        {/* Stats summary */}
+        <div className="section-header">本月總覽</div>
+        <div className="staff-detail-card">
+          <div className="stats-row">
+            <div className="stat-item">
+              <div className="stat-value">{employees.length}</div>
+              <div className="stat-label">員工</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">{shifts.length}</div>
+              <div className="stat-label">班次</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value" style={{ fontSize: 20 }}>{totalHours.toFixed(0)}</div>
+              <div className="stat-label">總時數</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="section-header">資料管理</div>
+        <div className="sheet-section" style={{ margin: '0 16px 16px' }}>
+          <div className="sheet-row" style={{ cursor: 'pointer' }} onClick={handleExport}>
+            <span style={{ fontSize: 20 }}>💾</span>
+            <span style={{ fontSize: 17, color: 'var(--ios-label)' }}>備份資料</span>
+            <span style={{ marginLeft: 'auto', color: 'var(--ios-gray)', fontSize: 14 }}>下載 JSON ›</span>
+          </div>
+          <div className="sheet-row" style={{ cursor: 'pointer' }} onClick={() => fileRef.current.click()}>
+            <span style={{ fontSize: 20 }}>📂</span>
+            <span style={{ fontSize: 17, color: 'var(--ios-label)' }}>讀取備份</span>
+            <span style={{ marginLeft: 'auto', color: 'var(--ios-gray)', fontSize: 14 }}>選擇 JSON ›</span>
+          </div>
+        </div>
+
+        <div className="sheet-section" style={{ margin: '0 16px 16px' }}>
+          <div className="sheet-row" style={{ cursor: 'pointer' }}
+            onClick={() => { if(confirm('確定重置所有資料？')) { setEmployees(INIT_EMPLOYEES); setShifts([]); showToast('已重置'); } }}>
+            <span style={{ fontSize: 20 }}>🗑️</span>
+            <span style={{ fontSize: 17, color: 'var(--ios-red)' }}>清除所有資料</span>
+          </div>
+        </div>
+
+        <div style={{ padding: '8px 16px 100px', textAlign: 'center' }}>
+          <p style={{ fontSize: 13, color: 'var(--ios-gray)', lineHeight: 1.6 }}>
+            Muko Brunch · 排班系統<br/>
+            <span style={{ fontSize: 11 }}>資料儲存於本機 LocalStorage</span>
+          </p>
+        </div>
+      </div>
+      <input type="file" ref={fileRef} accept=".json" style={{ display: 'none' }} onChange={handleImport} />
+    </div>
+  );
+}
+
+// ---- App ----
+function App() {
+  const [tab, setTab] = useState('schedule');
+
+  const [employees, setEmployees] = useState(() => {
+    try { const s = localStorage.getItem('muko_ios_emp'); return s ? JSON.parse(s) : INIT_EMPLOYEES; } catch { return INIT_EMPLOYEES; }
+  });
+  const [shifts, setShifts] = useState(() => {
+    try { const s = localStorage.getItem('muko_ios_shifts'); return s ? JSON.parse(s) : INIT_SHIFTS; } catch { return INIT_SHIFTS; }
+  });
+
+  useEffect(() => { try { localStorage.setItem('muko_ios_emp', JSON.stringify(employees)); } catch {} }, [employees]);
+  useEffect(() => { try { localStorage.setItem('muko_ios_shifts', JSON.stringify(shifts)); } catch {} }, [shifts]);
+
+  const tabs = [
+    { id: 'schedule', label: '班表', icon: '📅' },
+    { id: 'staff', label: '夥伴', icon: '👥' },
+    { id: 'settings', label: '設定', icon: '⚙️' },
+  ];
+
+  return (
+    <div className="iphone-frame">
+      <div className="dynamic-island">
+        <div className="camera-dot"></div>
+      </div>
+      <div className="iphone-screen">
+        <StatusBar />
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {tab === 'schedule' && <ScheduleTab employees={employees} shifts={shifts} setShifts={setShifts} />}
+          {tab === 'staff' && <StaffTab employees={employees} setEmployees={setEmployees} shifts={shifts} />}
+          {tab === 'settings' && <SettingsTab employees={employees} shifts={shifts} setEmployees={setEmployees} setShifts={setShifts} />}
+        </div>
+        <div className="tab-bar">
+          {tabs.map(t => (
+            <button key={t.id} className={`tab-item ${tab===t.id?'active':''}`} onClick={() => setTab(t.id)}>
+              <span className="tab-icon">{t.icon}</span>
+              <span className="tab-label">{t.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
